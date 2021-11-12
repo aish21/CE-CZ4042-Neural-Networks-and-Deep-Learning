@@ -9,7 +9,7 @@ from keras.preprocessing.sequence import pad_sequences
 from keras.layers import Dense, Embedding, LSTM, SpatialDropout1D, Dropout, Bidirectional, ConvLSTM2D, Flatten, Conv1D, Attention, Input
 from keras.models import Sequential
 from sklearn.model_selection import train_test_split
-
+import matplotlib.pyplot as plt
 import re
 import tensorflow as tf
 from tensorflow import keras
@@ -19,6 +19,7 @@ from keras.layers import Layer
 from nltk.tokenize import word_tokenize
 from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import GridSearchCV
+from tensorflow.keras.optimizers import Adam 
 
 class attention(Layer):
     def __init__(self,**kwargs):
@@ -109,31 +110,50 @@ X = pad_sequences(X)
 
 X_train, X_test, Y_train, Y_test = train_test_split(X, labels, test_size=0.3, random_state=42)
 
+'''
+keras.backend.clear_session()
+embed_dim = 8
+inputs=Input((28,))
+x=Embedding(128,embed_dim,input_length = X.shape[1],\
+            embeddings_regularizer=keras.regularizers.l2(.001))(inputs)
+bidirectional_in = Bidirectional(LSTM(128,return_sequences=True,dropout=0.3,recurrent_dropout=0.2))(x)
+att_in=Bidirectional(LSTM(128,return_sequences=True,dropout=0.3,recurrent_dropout=0.2))(bidirectional_in)
+att_out=attention()(att_in)
+outputs=Dense(9,activation='softmax',trainable=True)(att_out)
+model=keras.Model(inputs,outputs)
 
-def build_lstm():
-    embed_dim = 8
-    keras.backend.clear_session()
-    model_dropout = Sequential()
-    model_dropout.add(Embedding(input_dim=128, output_dim=embed_dim, input_length=X.shape[1]))
-    model_dropout.add(Dropout(rate=0.4))
-    model_dropout.add(Bidirectional(LSTM(units=256, return_sequences=True)))
-    model_dropout.add(Dropout(rate=0.4))
-    model_dropout.add(Bidirectional(LSTM(units=128, return_sequences=False)))
-    model_dropout.add(Dense(9, activation='softmax'))
-    model_dropout.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+'''
 
-    return model_dropout
+embed_dim = 8
+keras.backend.clear_session()
+model_dropout = Sequential()
+model_dropout.add(Embedding(input_dim = 128,output_dim = embed_dim,input_length = X.shape[1]))
+model_dropout.add(Dropout(rate=0.4))
+model_dropout.add(Bidirectional(LSTM(units=256, return_sequences=True)))
+model_dropout.add(Dropout(rate=0.4))
+model_dropout.add(Bidirectional(LSTM(units=128, return_sequences=False)))
+model_dropout.add(Dense(9, activation='softmax'))
+model_dropout.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-model=KerasClassifier(build_fn=build_lstm, verbose = -1)
-batch_size = [512, 256, 128, 64]
-epochs = [25, 50, 100, 150, 200]
-param_grid = dict(batch_size=batch_size, epochs=epochs)
-grid = GridSearchCV(estimator=model, param_grid=param_grid, cv=3)
-grid_result = grid.fit(X_train, Y_train)
+history = model_dropout.fit(X_train, Y_train, epochs = 50, batch_size=512, validation_data=(X_test, Y_test))
 
-print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
-means = grid_result.cv_results_['mean_test_score']
-stds = grid_result.cv_results_['std_test_score']
-params = grid_result.cv_results_['params']
-for mean, stdev, param in zip(means, stds, params):
-    print("%f (%f) with: %r" % (mean, stdev, param))
+# plotting the accuracies for the training epochs
+plt.figure(1)
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='best')
+plt.savefig('Accuracy.png')
+
+# plotting the losses for the training epochs
+plt.figure(1)
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('cross-entropy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='best')
+plt.savefig('Loss.png')
