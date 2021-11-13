@@ -22,20 +22,33 @@ from sklearn.model_selection import GridSearchCV
 from tensorflow.keras.optimizers import Adam 
 from keras.constraints import maxnorm
 
-tweetData = pd.read_csv('postprocessed-feature-engineered.csv', index_col=False)
+tweetData = pd.read_csv('Feature-Engineered.csv', index_col=False)
 
 labels = np.array(tweetData['tweettype'])
 y = []
 for i in range(len(labels)):
-    if labels[i] == 'positive':
+    if labels[i] == 'sadness':
         y.append(0)
-    elif labels[i] == 'negative':
-        y.append(1)
     elif labels[i] == 'neutral':
+        y.append(1)
+    elif labels[i] == 'joy':
         y.append(2)
+    elif labels[i] == 'love':
+        y.append(3)
+    elif labels[i] == 'enthusiasm':
+        y.append(4)
+    elif labels[i] == 'anger':
+        y.append(5)
+    elif labels[i] == 'surprise':
+        y.append(6)
+    elif labels[i] == 'relief':
+        y.append(7)
+    elif labels[i] == 'fear':
+        y.append(8)
 y = np.array(y)
-labels = tf.keras.utils.to_categorical(y, 3, dtype="float32")
+labels = tf.keras.utils.to_categorical(y, 9, dtype="float32")
 del y
+
 
 def featureEngineering(tweet):
     # Lower case tweet
@@ -76,36 +89,35 @@ X = pad_sequences(X)
 
 X_train, X_test, Y_train, Y_test = train_test_split(X, labels, test_size=0.3, random_state=42)
 
-embed_dim = 8
 keras.backend.clear_session()
 model_dropout = Sequential()
-model_dropout.add(Embedding(input_dim = 128,output_dim = embed_dim,input_length = X.shape[1]))
+model_dropout.add(Embedding(input_dim = 128,output_dim = 8,input_length = X.shape[1]))
 model_dropout.add(Dropout(rate=0.5))
 model_dropout.add(Bidirectional(LSTM(units=256, kernel_initializer= 'normal', return_sequences=True, kernel_constraint=maxnorm(4))))
 model_dropout.add(Dropout(rate=0.5))
 model_dropout.add(Bidirectional(LSTM(units=128, kernel_initializer= 'normal', return_sequences=False)))
-model_dropout.add(Dense(3, activation='softmax'))
+model_dropout.add(Dense(9, activation='softmax'))
 optimizer = Adam(lr=0.001)
-model_dropout.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
+model_dropout.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['categorical_accuracy'])
 
 history = model_dropout.fit(X_train, Y_train, epochs = 50, batch_size=512, validation_data=(X_test, Y_test))
 
 # plotting the accuracies for the training epochs
 plt.figure(1)
-plt.plot(history.history['accuracy'])
-plt.plot(history.history['val_accuracy'])
+plt.plot(history.history['categorical_accuracy'])
+plt.plot(history.history['val_categorical_accuracy'])
 plt.title('model accuracy')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
-plt.savefig('Accuracy_final.png')
+plt.savefig('LSTM-Bidirectional-Final-Accuracy.png')
 
 # plotting the losses for the training epochs
-plt.figure(1)
+plt.figure(2)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('model loss')
 plt.ylabel('cross-entropy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
-plt.savefig('Loss_final.png')
+plt.savefig('LSTM-Bidirectional-Final-Loss.png')

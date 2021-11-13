@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=sus
+#SBATCH --job-name=plswork
 #SBATCH --output=Output.out
 #SBATCH --error=Error.err
 #SBATCH --nodes=1
@@ -9,5 +9,4 @@
 
 module load anaconda
 source activate /apps/conda_env/CZ4042_v3
-python main.py
-
+python test.py

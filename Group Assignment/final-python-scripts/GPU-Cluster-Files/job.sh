@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=amogus
+#SBATCH --job-name=final
 #SBATCH --output=Output.out
 #SBATCH --error=Error.err
 #SBATCH --nodes=1
@@ -9,4 +9,5 @@
 
 module load anaconda
 source activate /apps/conda_env/CZ4042_v3
-python main2.py
+python main.py
+

@@ -21,29 +21,7 @@ from sklearn.model_selection import GridSearchCV
 from keras.constraints import maxnorm
 from tensorflow.keras.optimizers import Adam 
 
-class attention(Layer):
-    def __init__(self,**kwargs):
-        super(attention,self).__init__(**kwargs)
-
-    def build(self,input_shape):
-        self.W=self.add_weight(name="att_weight",shape=(input_shape[-1],1),initializer="normal")
-        self.b=self.add_weight(name="att_bias",shape=(input_shape[1],1),initializer="zeros")
-        super(attention, self).build(input_shape)
-
-    def call(self,x):
-        et=K.squeeze(K.tanh(K.dot(x,self.W)+self.b),axis=-1)
-        at=K.softmax(et)
-        at=K.expand_dims(at,axis=-1)
-        output=x*at
-        return K.sum(output,axis=1)
-
-    def compute_output_shape(self,input_shape):
-        return (input_shape[0],input_shape[-1])
-
-    def get_config(self):
-        return super(attention,self).get_config()
-
-tweetData = pd.read_csv('featureEngineeredFinal.csv', index_col=False)
+tweetData = pd.read_csv('Feature-Engineered.csv', index_col=False)
 
 labels = np.array(tweetData['tweettype'])
 y = []
@@ -110,28 +88,29 @@ X = pad_sequences(X)
 
 X_train, X_test, Y_train, Y_test = train_test_split(X, labels, test_size=0.3, random_state=42)
 
-def build_lstm(dropout_rate=0.0, weight_constraint=0):
-    embed_dim = 8
+def build_lstm():
     keras.backend.clear_session()
     model_dropout = Sequential()
-    model_dropout.add(Embedding(input_dim=128, output_dim=embed_dim, input_length=X.shape[1]))
-    model_dropout.add(Dropout(dropout_rate))
-    model_dropout.add(Bidirectional(LSTM(units=256, kernel_initializer='normal', return_sequences=True, kernel_constraint=maxnorm(weight_constraint))))
-    model_dropout.add(Dropout(dropout_rate))
-    model_dropout.add(Bidirectional(LSTM(units=128, kernel_initializer='normal', return_sequences=False)))
+    model_dropout.add(Embedding(input_dim=128, output_dim=8, input_length=X.shape[1]))
+    model_dropout.add(Dropout(0.4))
+    model_dropout.add(Bidirectional(LSTM(units=256, return_sequences=True, kernel_initializer=init_mode)))
+    model_dropout.add(Dropout(0.4))
+    model_dropout.add(Bidirectional(LSTM(units=128, return_sequences=False, kernel_initializer=init_mode)))
     model_dropout.add(Dense(9, activation='softmax'))
-    optimizer = Adam(lr=0.001)
-    model_dropout.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
-
+    optimizer = Adam(lr = 0.001)
+    model_dropout.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['categorical_accuracy'])
     return model_dropout
 
+# Create model
 model=KerasClassifier(build_fn=build_lstm, epochs=50, batch_size=512, verbose=-1)
-weight_constraint = [1, 2, 3, 4, 5]
-dropout_rate = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-param_grid = dict(dropout_rate=dropout_rate, weight_constraint=weight_constraint)
-grid = GridSearchCV(estimator=model, param_grid=param_grid, cv=3)
+
+# Define the grid search parameters
+init_mode = ['uniform', 'lecun_uniform', 'normal', 'zero', 'glorot_normal', 'glorot_uniform', 'he_normal', 'he_uniform']
+param_grid = dict(init_mode=init_mode)
+grid = GridSearchCV(estimator=model, param_grid=param_grid, n_jobs=-1, cv=3)
 grid_result = grid.fit(X_train, Y_train)
 
+# Summarize results
 print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
 means = grid_result.cv_results_['mean_test_score']
 stds = grid_result.cv_results_['std_test_score']
