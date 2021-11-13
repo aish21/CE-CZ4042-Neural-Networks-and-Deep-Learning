@@ -9,7 +9,6 @@ from keras.preprocessing.sequence import pad_sequences
 from keras.layers import Dense, Embedding, LSTM, SpatialDropout1D, Dropout, Bidirectional, ConvLSTM2D, Flatten, Conv1D, Attention, Input
 from keras.models import Sequential
 from sklearn.model_selection import train_test_split
-
 import re
 import tensorflow as tf
 from tensorflow import keras
@@ -19,6 +18,8 @@ from keras.layers import Layer
 from nltk.tokenize import word_tokenize
 from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import GridSearchCV
+from keras.constraints import maxnorm
+from tensorflow.keras.optimizers import Adam 
 
 class attention(Layer):
     def __init__(self,**kwargs):
@@ -109,24 +110,25 @@ X = pad_sequences(X)
 
 X_train, X_test, Y_train, Y_test = train_test_split(X, labels, test_size=0.3, random_state=42)
 
-def build_lstm(init_mode='glorot_uniform'):
+def build_lstm(dropout_rate=0.0, weight_constraint=0):
     embed_dim = 8
     keras.backend.clear_session()
     model_dropout = Sequential()
     model_dropout.add(Embedding(input_dim=128, output_dim=embed_dim, input_length=X.shape[1]))
-    model_dropout.add(Dropout(rate=0.4))
-    model_dropout.add(Bidirectional(LSTM(units=256, kernel_initializer=init_mode, return_sequences=True)))
-    model_dropout.add(Dropout(rate=0.4))
-    model_dropout.add(Bidirectional(LSTM(units=128, kernel_initializer=init_mode, return_sequences=False)))
+    model_dropout.add(Dropout(dropout_rate))
+    model_dropout.add(Bidirectional(LSTM(units=256, kernel_initializer='normal', return_sequences=True, kernel_constraint=maxnorm(weight_constraint))))
+    model_dropout.add(Dropout(dropout_rate))
+    model_dropout.add(Bidirectional(LSTM(units=128, kernel_initializer='normal', return_sequences=False)))
     model_dropout.add(Dense(9, activation='softmax'))
-    #optimizer = Adam(lr=learn_rate)
-    model_dropout.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    optimizer = Adam(lr=0.001)
+    model_dropout.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['accuracy'])
 
     return model_dropout
 
 model=KerasClassifier(build_fn=build_lstm, epochs=50, batch_size=512, verbose=-1)
-init_mode = ['uniform', 'lecun_uniform', 'normal', 'zero', 'glorot_normal', 'glorot_uniform', 'he_normal', 'he_uniform']
-param_grid = dict(init_mode=init_mode)
+weight_constraint = [1, 2, 3, 4, 5]
+dropout_rate = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+param_grid = dict(dropout_rate=dropout_rate, weight_constraint=weight_constraint)
 grid = GridSearchCV(estimator=model, param_grid=param_grid, cv=3)
 grid_result = grid.fit(X_train, Y_train)
 
@@ -136,5 +138,3 @@ stds = grid_result.cv_results_['std_test_score']
 params = grid_result.cv_results_['params']
 for mean, stdev, param in zip(means, stds, params):
     print("%f (%f) with: %r" % (mean, stdev, param))
-
-

@@ -9,4 +9,4 @@
 
 module load anaconda
 source activate /apps/conda_env/CZ4042_v3
-python test.py
+python main2.py
