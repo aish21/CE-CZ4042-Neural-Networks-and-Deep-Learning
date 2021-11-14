@@ -6,26 +6,9 @@
 
 import pandas as pd
 import seaborn as sb
-import matplotlib as plt
-import numpy as np
-import sklearn
-import matplotlib.pyplot as mtplt
 
 
 # In[ ]:
-
-
-from nltk.corpus import stopwords
-from collections import  Counter
-from sklearn.feature_extraction.text import CountVectorizer
-import gensim
-from nltk.stem import WordNetLemmatizer,PorterStemmer
-from nltk.tokenize import word_tokenize
-import pyLDAvis
-import pyLDAvis.gensim_models as gensimvis
-from wordcloud import WordCloud, STOPWORDS
-pyLDAvis.enable_notebook()
-
 
 # In[4]:
 

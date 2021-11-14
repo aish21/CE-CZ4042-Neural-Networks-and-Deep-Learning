@@ -22,6 +22,7 @@ import tensorflow as tf
 from tensorflow import keras
 import numpy as np
 from keras import backend as K
+from keras.layers import Layer
 
 tweetData = pd.read_csv('featureEngineeredFinal.csv', index_col=False)
 tweetData
@@ -332,8 +333,6 @@ plt.savefig('1DConvlutional_with_dropouts_losses.png')
 
 # In[89]:
 
-
-from keras.layers import Layer
 class attention(Layer):
     def __init__(self,**kwargs):
         super(attention,self).__init__(**kwargs)

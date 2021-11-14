@@ -27,20 +27,19 @@ import pandas as pd
 from nltk.corpus import stopwords
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
-from keras.layers import Dense, Embedding, LSTM, SpatialDropout1D, Dropout, Bidirectional, ConvLSTM2D, Flatten, Conv1D, Attention, Input
+from keras.layers import Dense, Embedding, LSTM, Dropout, Bidirectional
 from keras.models import Sequential
 from sklearn.model_selection import train_test_split
 import re
 import tensorflow as tf
 from tensorflow import keras
 import numpy as np
-from keras import backend as K
-from keras.layers import Layer
 from nltk.tokenize import word_tokenize
 from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import GridSearchCV
 from keras.constraints import maxnorm
 from tensorflow.keras.optimizers import Adam 
+from matplotlib import pyplot as plt
 
 
 # In[2]:

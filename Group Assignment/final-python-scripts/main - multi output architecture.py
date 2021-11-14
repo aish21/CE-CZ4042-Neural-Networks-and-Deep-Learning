@@ -6,78 +6,17 @@ nltk.download('stopwords')
 nltk.download('wordnet')
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
-from keras.layers import Dense, Embedding, LSTM, MaxPooling1D, Dropout, Bidirectional, ConvLSTM2D, Flatten, Conv1D, Attention, Input
-from keras.models import Sequential
+from keras.layers import Dense, Embedding, LSTM, MaxPooling1D, Dropout, Conv1D, Input
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import OneHotEncoder
 from keras import Model
 
 import re
-import tensorflow as tf
 from tensorflow import keras
 import numpy as np
-from keras import backend as K
-from keras.layers import Layer
 from nltk.tokenize import word_tokenize
-from keras.wrappers.scikit_learn import KerasClassifier
-from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import classification_report, accuracy_score, f1_score
 
-'''
-class attention(Layer):
-    def __init__(self,**kwargs):
-        super(attention,self).__init__(**kwargs)
-
-    def build(self,input_shape):
-        self.W=self.add_weight(name="att_weight",shape=(input_shape[-1],1),initializer="normal")
-        self.b=self.add_weight(name="att_bias",shape=(input_shape[1],1),initializer="zeros")
-        super(attention, self).build(input_shape)
-
-    def call(self,x):
-        et=K.squeeze(K.tanh(K.dot(x,self.W)+self.b),axis=-1)
-        at=K.softmax(et)
-        at=K.expand_dims(at,axis=-1)
-        output=x*at
-        return K.sum(output,axis=1)
-
-    def compute_output_shape(self,input_shape):
-        return (input_shape[0],input_shape[-1])
-
-    def get_config(self):
-        return super(attention,self).get_config()
-'''
-
 tweetData = pd.read_csv('featureEngineeredFinal.csv', index_col=False)
-
-'''
-enc = OneHotEncoder(handle_unknown='ignore')
-labels = np.array(tweetData['tweettype'])
-labels = enc.fit_transform(labels.reshape(-1, 1))
-
-y = []
-for i in range(len(labels)):
-    if labels[i] == 'sadness':
-        y.append(0)
-    elif labels[i] == 'neutral':
-        y.append(1)
-    elif labels[i] == 'joy':
-        y.append(2)
-    elif labels[i] == 'love':
-        y.append(3)
-    elif labels[i] == 'enthusiasm':
-        y.append(4)
-    elif labels[i] == 'anger':
-        y.append(5)
-    elif labels[i] == 'surprise':
-        y.append(6)
-    elif labels[i] == 'relief':
-        y.append(7)
-    elif labels[i] == 'fear':
-        y.append(8)
-y = np.array(y)
-labels = tf.keras.utils.to_categorical(y, 9, dtype="float32")
-del y
-'''
 
 def featureEngineering(tweet):
     # Lower case tweet
@@ -187,36 +126,3 @@ for col_idx, col in enumerate(output_columns_binary):
     print(classification_report(Y_test[col], y_pred[col_idx]))
 
 print('Total :',np.sum(f1_score_results))
-
-
-'''
-def build_lstm():
-    embed_dim = 8
-    keras.backend.clear_session()
-    model_dropout = Sequential()
-    model_dropout.add(Embedding(input_dim=128, output_dim=embed_dim, input_length=X.shape[1]))
-    model_dropout.add(Dropout(rate=0.4))
-    model_dropout.add(Bidirectional(LSTM(units=256, return_sequences=True)))
-    model_dropout.add(Dropout(rate=0.4))
-    model_dropout.add(Bidirectional(LSTM(units=128, return_sequences=False)))
-    model_dropout.add(Dense(9, activation='softmax'))
-    model_dropout.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-    return model_dropout
-
-    model=KerasClassifier(build_fn=build_lstm, verbose = -1)
-batch_size = [512, 256, 128, 64]
-epochs = [25, 50, 100, 150, 200]
-param_grid = dict(batch_size=batch_size, epochs=epochs)
-grid = GridSearchCV(estimator=model, param_grid=param_grid, cv=3)
-grid_result = grid.fit(X_train, Y_train)
-
-print("Best: %f using %s" % (grid_result.best_score_, grid_result.best_params_))
-means = grid_result.cv_results_['mean_test_score']
-stds = grid_result.cv_results_['std_test_score']
-params = grid_result.cv_results_['params']
-for mean, stdev, param in zip(means, stds, params):
-    print("%f (%f) with: %r" % (mean, stdev, param))
-
-'''
-

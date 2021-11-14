@@ -8,9 +8,7 @@
 
 import pandas as pd
 import seaborn as sb
-import matplotlib as plt
 import numpy as np
-import sklearn
 import matplotlib.pyplot as mtplt
 from nltk.corpus import stopwords
 from collections import  Counter
