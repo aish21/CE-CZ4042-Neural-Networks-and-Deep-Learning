@@ -22,7 +22,29 @@ from sklearn.model_selection import GridSearchCV
 from tensorflow.keras.optimizers import Adam 
 from keras.constraints import maxnorm
 
-tweetData = pd.read_csv('Feature-Engineered.csv', index_col=False)
+tweetData = pd.read_csv('featureEngineeredFinal.csv', index_col=False)
+
+class attention(Layer):
+    def __init__(self,**kwargs):
+        super(attention,self).__init__(**kwargs)
+
+    def build(self,input_shape):
+        self.W=self.add_weight(name="att_weight",shape=(input_shape[-1],1),initializer="normal")
+        self.b=self.add_weight(name="att_bias",shape=(input_shape[1],1),initializer="zeros")        
+        super(attention, self).build(input_shape)
+
+    def call(self,x):
+        et=K.squeeze(K.tanh(K.dot(x,self.W)+self.b),axis=-1)
+        at=K.softmax(et)
+        at=K.expand_dims(at,axis=-1)
+        output=x*at
+        return K.sum(output,axis=1)
+
+    def compute_output_shape(self,input_shape):
+        return (input_shape[0],input_shape[-1])
+
+    def get_config(self):
+        return super(attention,self).get_config()
 
 labels = np.array(tweetData['tweettype'])
 y = []
@@ -90,17 +112,24 @@ X = pad_sequences(X)
 X_train, X_test, Y_train, Y_test = train_test_split(X, labels, test_size=0.3, random_state=42)
 
 keras.backend.clear_session()
-model_dropout = Sequential()
-model_dropout.add(Embedding(input_dim = 128,output_dim = 8,input_length = X.shape[1]))
-model_dropout.add(Dropout(rate=0.5))
-model_dropout.add(Bidirectional(LSTM(units=256, kernel_initializer= 'normal', return_sequences=True, kernel_constraint=maxnorm(4))))
-model_dropout.add(Dropout(rate=0.5))
-model_dropout.add(Bidirectional(LSTM(units=128, kernel_initializer= 'normal', return_sequences=False)))
-model_dropout.add(Dense(9, activation='softmax'))
-optimizer = Adam(lr=0.001)
-model_dropout.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['categorical_accuracy'])
-
-history = model_dropout.fit(X_train, Y_train, epochs = 50, batch_size=512, validation_data=(X_test, Y_test))
+embed_dim = 8
+inputs=Input((28,))
+x=Embedding(128,embed_dim,input_length = X.shape[1],            embeddings_regularizer=keras.regularizers.l2(.001))(inputs)
+x = Conv1D(filters=32,
+               kernel_size=8,
+               strides=1,
+               activation='relu',
+               padding='same') (x)
+bidirectional_in = Bidirectional(LSTM(128,return_sequences=True,dropout=0.3,recurrent_dropout=0.2))(x)
+dropout_in = Dropout(rate=0.4)(bidirectional_in)
+att_in=Bidirectional(LSTM(128,return_sequences=True,dropout=0.3,recurrent_dropout=0.2))(dropout_in)
+dropout_in = Dropout(rate=0.4)(att_in)
+att_out=attention()(dropout_in)
+outputs=Dense(9,activation='softmax',trainable=True)(att_out)
+model=keras.Model(inputs,outputs)
+#keras.utils.plot_model(model, show_shapes=True, rankdir="LR",to_file = "BidirectionalLSTM with Attention.png")
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+history = model.fit(X_train, Y_train, epochs = 50, batch_size=64, validation_data=(X_test, Y_test))
 
 # plotting the accuracies for the training epochs
 plt.figure(1)
