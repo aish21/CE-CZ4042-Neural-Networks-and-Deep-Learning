@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[91]:
-
-
 '''
 This file contains the trial for the model run - Attention, Covolutional, Bidirectional, Forward-Backward LSTM
 and permutations of the above - without Hyperparameter Tuning.
@@ -16,37 +10,21 @@ from nltk.corpus import stopwords
 nltk.download('punkt')
 nltk.download('stopwords')
 nltk.download('wordnet')
-from sklearn.preprocessing import LabelEncoder
-from collections import Counter
-import wordcloud
-from sklearn.metrics import classification_report,confusion_matrix,accuracy_score
 from keras.models import Sequential
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
-from keras.layers import Dense, Embedding, LSTM, SpatialDropout1D, Dropout, Bidirectional, ConvLSTM2D, Flatten, Conv1D, Attention, Input
+from keras.layers import Dense, Embedding, LSTM, Dropout, Bidirectional, Conv1D, Input
 from sklearn.model_selection import train_test_split 
 import matplotlib.pyplot as plt
 import re
 from nltk.tokenize import word_tokenize
-from sklearn.feature_extraction.text import TfidfVectorizer
 import tensorflow as tf
 from tensorflow import keras
 import numpy as np
-from keras.wrappers.scikit_learn import KerasClassifier
-from sklearn.model_selection import GridSearchCV
 from keras import backend as K
-
-
-# In[29]:
-
 
 tweetData = pd.read_csv('featureEngineeredFinal.csv', index_col=False)
 tweetData
-
-
-# In[31]:
-
-
 # Added in to avoid formatting error
 labels = np.array(tweetData['tweettype'])
 y = []
@@ -116,8 +94,6 @@ X_train, X_test, Y_train, Y_test = train_test_split(X, labels, test_size=0.3, ra
 
 # ### Initial Bidirectional
 
-# In[18]:
-
 
 embed_dim = 64
 keras.backend.clear_session()
@@ -127,10 +103,11 @@ model_dropout.add(Dropout(rate=0.4))
 model_dropout.add(Bidirectional(LSTM(units=128, return_sequences=True)))
 model_dropout.add(Dropout(rate=0.4))
 model_dropout.add(Bidirectional(LSTM(units=128, return_sequences=False)))
-model_dropout.add(Dense(1, activation='softmax'))
+model_dropout.add(Dense(9, activation='softmax'))
 
 model_dropout.summary()
-
+# Visualize the model
+#keras.utils.plot_model(model_dropout, show_shapes=True, rankdir="LR",to_file = "Bidirectional.png")
 
 # In[20]:
 
@@ -155,21 +132,21 @@ plt.title('model accuracy')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
-plt.savefig('1b_accuracies.png')
+plt.savefig('bidirectional_accuracy.png')
 
 
 # In[24]:
 
 
 # plotting the losses for the training epochs
-plt.figure(1)
+plt.figure(2)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('model loss')
 plt.ylabel('cross-entropy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
-plt.savefig('1c_losses.png')
+plt.savefig('bidirectional_losses.png')
 
 
 # ### Single Bidirectional
@@ -185,6 +162,7 @@ model_dropout.add(Dropout(rate=0.4))
 model_dropout.add(Bidirectional(LSTM(units=128, return_sequences=False)))
 model_dropout.add(Dense(9, activation='softmax'))
 model_dropout.summary()
+#keras.utils.plot_model(model_dropout, show_shapes=True, rankdir="LR",to_file = "Single_Bidirectional.png")
 
 
 # In[37]:
@@ -203,28 +181,28 @@ history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, valida
 
 
 # plotting the accuracies for the training epochs
-plt.figure(1)
+plt.figure(3)
 plt.plot(history.history['accuracy'])
 plt.plot(history.history['val_accuracy'])
 plt.title('model accuracy')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
-plt.savefig('2b_accuracies.png')
+plt.savefig('single_bidirectional_accuracies.png')
 
 
 # In[40]:
 
 
 # plotting the losses for the training epochs
-plt.figure(1)
+plt.figure(4)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('model loss')
 plt.ylabel('cross-entropy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
-plt.savefig('2c_losses.png')
+plt.savefig('single_bidirectional_losses.png')
 
 
 # ### Convolutional 1D
@@ -245,7 +223,7 @@ model_dropout.add(LSTM(units=128, return_sequences=False))
 model_dropout.add(Dense(9, activation='softmax'))
 
 model_dropout.summary()
-
+#keras.utils.plot_model(model_dropout, show_shapes=True, rankdir="LR",to_file = "1D_Convolutional.png")
 
 # In[61]:
 
@@ -263,28 +241,28 @@ history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, valida
 
 
 # plotting the accuracies for the training epochs
-plt.figure(1)
+plt.figure(5)
 plt.plot(history.history['accuracy'])
 plt.plot(history.history['val_accuracy'])
 plt.title('model accuracy')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
-plt.savefig('3b_accuracies.png')
+plt.savefig('1D_convolutional_accuracies.png')
 
 
 # In[64]:
 
 
 # plotting the losses for the training epochs
-plt.figure(1)
+plt.figure(6)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('model loss')
 plt.ylabel('cross-entropy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
-plt.savefig('3c_losses.png')
+plt.savefig('1D_convolutional_losses.png')
 
 
 # ### Convolutional 1D + Dropouts
@@ -307,7 +285,7 @@ model_dropout.add(Dropout(rate=0.4))
 model_dropout.add(Dense(9, activation='softmax'))
 
 model_dropout.summary()
-
+#keras.utils.plot_model(model_dropout, show_shapes=True, rankdir="LR",to_file = "1DConvlutional_with_dropouts.png")
 
 # In[66]:
 
@@ -325,88 +303,29 @@ history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, valida
 
 
 # plotting the accuracies for the training epochs
-plt.figure(1)
+plt.figure(7)
 plt.plot(history.history['accuracy'])
 plt.plot(history.history['val_accuracy'])
 plt.title('model accuracy')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
-plt.savefig('4b_accuracies.png')
+plt.savefig('1DConvlutional_with_dropouts_accuracies.png')
 
 
 # In[69]:
 
 
 # plotting the losses for the training epochs
-plt.figure(1)
+plt.figure(8)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('model loss')
 plt.ylabel('cross-entropy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
-plt.savefig('4c_losses.png')
+plt.savefig('1DConvlutional_with_dropouts_losses.png')
 
-
-# ### Convolutional 1D + LSTM
-
-# In[76]:
-
-
-keras.backend.clear_session()
-
-model_dropout = Sequential()
-model_dropout.add(Embedding(128,embed_dim,input_length = X.shape[1]))
-model_dropout.add(Conv1D(filters=32,
-               kernel_size=8,
-               strides=1,
-               activation='relu',
-               padding='same', kernel_regularizer=keras.regularizers.l1()))
-model_dropout.add(LSTM(units=128, return_sequences=False))
-model_dropout.add(Dense(9, activation='softmax'))
-
-model_dropout.summary()
-
-
-# In[77]:
-
-
-model_dropout.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-
-# In[78]:
-
-
-history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, validation_data=(X_test, Y_test))
-
-
-# In[79]:
-
-
-# plotting the accuracies for the training epochs
-plt.figure(1)
-plt.plot(history.history['accuracy'])
-plt.plot(history.history['val_accuracy'])
-plt.title('model accuracy')
-plt.ylabel('accuracy')
-plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='best')
-plt.savefig('5b_accuracies.png')
-
-
-# In[80]:
-
-
-# plotting the losses for the training epochs
-plt.figure(1)
-plt.plot(history.history['loss'])
-plt.plot(history.history['val_loss'])
-plt.title('model loss')
-plt.ylabel('cross-entropy')
-plt.xlabel('epoch')
-plt.legend(['train', 'test'], loc='best')
-plt.savefig('5c_losses.png')
 
 
 # ### Attention + Bidirectional + LSTM permutations
@@ -451,7 +370,7 @@ att_out=attention()(att_in)
 outputs=Dense(9,activation='softmax',trainable=True)(att_out)
 model=keras.Model(inputs,outputs)
 model.summary()
-
+#keras.utils.plot_model(model, show_shapes=True, rankdir="LR",to_file = "LSTM with Attention.png")
 
 # In[101]:
 
@@ -469,54 +388,28 @@ history = model.fit(X_train, Y_train, epochs = 20, batch_size=64, validation_dat
 
 
 # plotting the accuracies for the training epochs
-plt.figure(1)
+plt.figure(9)
 plt.plot(history.history['accuracy'])
 plt.plot(history.history['val_accuracy'])
 plt.title('model accuracy')
 plt.ylabel('accuracy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
-plt.savefig('6b_accuracies.png')
+plt.savefig('LSTM_with_attention_accuracies.png')
 
 
 # In[104]:
 
 
 # plotting the losses for the training epochs
-plt.figure(1)
+plt.figure(10)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('model loss')
 plt.ylabel('cross-entropy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
-plt.savefig('6c_losses.png')
-
-
-# In[ ]:
-
-
-class attention(Layer):
-    def __init__(self,**kwargs):
-        super(attention,self).__init__(**kwargs)
-
-    def build(self,input_shape):
-        self.W=self.add_weight(name="att_weight",shape=(input_shape[-1],1),initializer="normal")
-        self.b=self.add_weight(name="att_bias",shape=(input_shape[1],1),initializer="zeros")
-        super(attention, self).build(input_shape)
-
-    def call(self,x):
-        et=K.squeeze(K.tanh(K.dot(x,self.W)+self.b),axis=-1)
-        at=K.softmax(et)
-        at=K.expand_dims(at,axis=-1)
-        output=x*at
-        return K.sum(output,axis=1)
-
-    def compute_output_shape(self,input_shape):
-        return (input_shape[0],input_shape[-1])
-
-    def get_config(self):
-        return super(attention,self).get_config()
+plt.savefig('LSTM_with_attention_losses.png')
 
 keras.backend.clear_session()
 embed_dim = 8
@@ -527,6 +420,30 @@ att_in=Bidirectional(LSTM(128,return_sequences=True,dropout=0.3,recurrent_dropou
 att_out=attention()(att_in)
 outputs=Dense(9,activation='softmax',trainable=True)(att_out)
 model=keras.Model(inputs,outputs)
-
+#keras.utils.plot_model(model, show_shapes=True, rankdir="LR",to_file = "BidirectionalLSTM with Attention.png")
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+history = model.fit(X_train, Y_train, epochs = 20, batch_size=64, validation_data=(X_test, Y_test))
 
+# plotting the accuracies for the training epochs
+plt.figure(11)
+plt.plot(history.history['accuracy'])
+plt.plot(history.history['val_accuracy'])
+plt.title('model accuracy')
+plt.ylabel('accuracy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='best')
+plt.savefig('Bidirectional_LSTM_with_attention_accuracies.png')
+
+
+# In[104]:
+
+
+# plotting the losses for the training epochs
+plt.figure(12)
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('model loss')
+plt.ylabel('cross-entropy')
+plt.xlabel('epoch')
+plt.legend(['train', 'test'], loc='best')
+plt.savefig('Bidirectional_LSTM_with_attention_losses.png')
