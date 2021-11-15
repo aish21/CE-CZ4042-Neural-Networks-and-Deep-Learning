@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=final
+#SBATCH --job-name=CZ4042
 #SBATCH --output=Output.out
 #SBATCH --error=Error.err
 #SBATCH --nodes=1
@@ -10,4 +10,3 @@
 module load anaconda
 source activate /apps/conda_env/CZ4042_v3
 python main.py
-
