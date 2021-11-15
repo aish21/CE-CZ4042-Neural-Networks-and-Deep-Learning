@@ -25,7 +25,8 @@ from nltk.tokenize import word_tokenize
 from tensorflow.keras.optimizers import Adam 
 from keras.constraints import maxnorm
 
-tweetData = pd.read_csv('Feature-Engineered.csv', index_col=False)
+#Reading in the dataset
+tweetData = pd.read_csv('data\Feature-Engineered.csv', index_col=False)
 
 # Added in to avoid formatting error
 labels = np.array(tweetData['tweettype'])
@@ -86,14 +87,17 @@ def lemmatizeTweet(tweet):
 
 tweetData['lemmatizedText'] = tweetData["modTweet"].apply(lambda x:lemmatizeTweet(x))
 
+#Tokenize the input data
 tokenizer = Tokenizer(num_words=27608, split=' ')
 tokenizer.fit_on_texts(tweetData['lemmatizedText'].values)
 X = tokenizer.texts_to_sequences(tweetData['lemmatizedText'].values)
 X = pad_sequences(X)
 
+#Train-test split
 X_train, X_test, Y_train, Y_test = train_test_split(X, labels, test_size=0.3, random_state=42)
 
-"""## Basic Model Structure
+"""
+Basic Model Structure
 Embedding + 2 Bidirectional layers + Dropouts
 """
 
@@ -106,8 +110,9 @@ model_dropout.add(Dropout(rate=0.5))
 model_dropout.add(Bidirectional(LSTM(units=128, kernel_initializer= 'normal', return_sequences=False)))
 model_dropout.add(Dense(9, activation='softmax'))
 optimizer = Adam(lr=0.001)
-model_dropout.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['categorical_accuracy'])
 
+#Compile and test model
+model_dropout.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['categorical_accuracy'])
 history = model_dropout.fit(X_train, Y_train, epochs = 50, batch_size=512, validation_data=(X_test, Y_test))
 
 #Plotting the training accuracies
@@ -130,9 +135,26 @@ plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
 plt.savefig('LSTM-Bidirectional-Final-Loss.png')
 
-tweetData = pd.read_csv('Postprocessed-Feature-Engineered.csv', index_col=False)
+"""Model trial after clubbing output labels"""
+tweetData = pd.read_csv('data\Postprocessed-Feature-Engineered.csv', index_col=False)
 
-"""## Model trial after clubbing output labels"""
+#New labels
+labels = np.array(tweetData['tweettype'])
+y = []
+for i in range(len(labels)):
+    if labels[i] == 'negative':
+        y.append(0)
+    elif labels[i] == 'neutral':
+        y.append(1)
+    elif labels[i] == 'positive':
+        y.append(2)
+
+y = np.array(y)
+labels = tf.keras.utils.to_categorical(y, 3, dtype="float32")
+del y
+
+#Train-test split
+X_train, X_test, Y_train, Y_test = train_test_split(X, labels, test_size=0.3, random_state=42)
 
 keras.backend.clear_session()
 model_dropout = Sequential()
@@ -143,12 +165,13 @@ model_dropout.add(Dropout(rate=0.5))
 model_dropout.add(Bidirectional(LSTM(units=128, kernel_initializer= 'normal', return_sequences=False)))
 model_dropout.add(Dense(3, activation='softmax'))
 optimizer = Adam(lr=0.001)
-model_dropout.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['categorical_accuracy'])
 
+#Compile and train the model
+model_dropout.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['categorical_accuracy'])
 history = model_dropout.fit(X_train, Y_train, epochs = 50, batch_size=512, validation_data=(X_test, Y_test))
 
 #Plotting the accuracies
-plt.figure(1)
+plt.figure(3)
 plt.plot(history.history['categorical_accuracy'])
 plt.plot(history.history['val_categorical_accuracy'])
 plt.title('model accuracy')
@@ -158,7 +181,7 @@ plt.legend(['train', 'test'], loc='best')
 plt.savefig('LSTM-Postprocessed-Accuracy.png')
 
 #Plotting the losses
-plt.figure(2)
+plt.figure(4)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('model loss')

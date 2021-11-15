@@ -45,7 +45,7 @@ from matplotlib import pyplot as plt
 # In[2]:
 
 
-tweetData = pd.read_csv('../data/Feature-Engineered.csv', index_col=False)
+tweetData = pd.read_csv('data/Feature-Engineered.csv', index_col=False)
 
 
 # In[4]:
@@ -164,7 +164,7 @@ for mean, stdev, param in zip(means, stds, params):
 # In[ ]:
 
 
-def build_lstm():
+def build_lstm_optimizer():
     keras.backend.clear_session()
     model_dropout = Sequential()
     model_dropout.add(Embedding(input_dim=128, output_dim=8, input_length=X.shape[1]))
@@ -181,7 +181,7 @@ def build_lstm():
 
 
 # Create model
-model=KerasClassifier(build_fn=build_lstm, epochs=50, batch_size=512, verbose=-1)
+model=KerasClassifier(build_fn=build_lstm_optimizer, epochs=50, batch_size=512, verbose=-1)
 
 # Define the grid search parameters
 optimizer = ['SGD', 'RMSprop', 'Adagrad', 'Adadelta', 'Adam', 'Adamax', 'Nadam']
@@ -203,7 +203,7 @@ for mean, stdev, param in zip(means, stds, params):
 # In[13]:
 
 
-def build_lstm():
+def build_lstm_learning_rate():
     keras.backend.clear_session()
     model_dropout = Sequential()
     model_dropout.add(Embedding(input_dim=128, output_dim=8, input_length=X.shape[1]))
@@ -221,7 +221,7 @@ def build_lstm():
 
 
 # Create model
-model=KerasClassifier(build_fn=build_lstm, epochs=50, batch_size=512, verbose=-1)
+model=KerasClassifier(build_fn=build_lstm_learning_rate, epochs=50, batch_size=512, verbose=-1)
 
 # Define the grid search parameters
 learn_rate = [0.001, 0.01, 0.03, 0.05, 0.07, 0.09, 0.1, 0.2]
@@ -243,7 +243,7 @@ for mean, stdev, param in zip(means, stds, params):
 # In[ ]:
 
 
-def build_lstm():
+def build_lstm_weight():
     keras.backend.clear_session()
     model_dropout = Sequential()
     model_dropout.add(Embedding(input_dim=128, output_dim=8, input_length=X.shape[1]))
@@ -261,7 +261,7 @@ def build_lstm():
 
 
 # Create model
-model=KerasClassifier(build_fn=build_lstm, epochs=50, batch_size=512, verbose=-1)
+model=KerasClassifier(build_fn=build_lstm_weight, epochs=50, batch_size=512, verbose=-1)
 
 # Define the grid search parameters
 init_mode = ['uniform', 'lecun_uniform', 'normal', 'zero', 'glorot_normal', 'glorot_uniform', 'he_normal', 'he_uniform']
@@ -283,7 +283,7 @@ for mean, stdev, param in zip(means, stds, params):
 # In[ ]:
 
 
-def build_lstm(dropout_rate=0.0, weight_constraint=0):
+def build_lstm_dropout(dropout_rate=0.0, weight_constraint=0):
     embed_dim = 8
     keras.backend.clear_session()
     model_dropout = Sequential()
@@ -302,7 +302,7 @@ def build_lstm(dropout_rate=0.0, weight_constraint=0):
 
 
 # Create model
-model=KerasClassifier(build_fn=build_lstm, epochs=50, batch_size=512, verbose=-1)
+model=KerasClassifier(build_fn=build_lstm_dropout, epochs=50, batch_size=512, verbose=-1)
 
 # Define the grid search parameters
 weight_constraint = [1, 2, 3, 4, 5]
@@ -363,7 +363,7 @@ plt.savefig('testAcc1.png')
 
 
 # plotting the losses for the training epochs
-plt.figure(1)
+plt.figure(2)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('model loss')
@@ -400,7 +400,7 @@ history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, valida
 
 
 # plotting the accuracies for the training epochs
-plt.figure(1)
+plt.figure(3)
 plt.plot(history.history['categorical_accuracy'])
 plt.plot(history.history['val_categorical_accuracy'])
 plt.title('model accuracy')
@@ -414,7 +414,7 @@ plt.savefig('testAcc2.png')
 
 
 # plotting the losses for the training epochs
-plt.figure(1)
+plt.figure(4)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('model loss')
@@ -450,7 +450,7 @@ history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, valida
 # In[27]:
 
 
-plt.figure(1)
+plt.figure(5)
 plt.plot(history.history['categorical_accuracy'])
 plt.plot(history.history['val_categorical_accuracy'])
 plt.title('model accuracy')
@@ -463,7 +463,7 @@ plt.savefig('testAcc3.png')
 # In[28]:
 
 
-plt.figure(1)
+plt.figure(6)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('model loss')
@@ -499,7 +499,7 @@ history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, valida
 # In[31]:
 
 
-plt.figure(1)
+plt.figure(7)
 plt.plot(history.history['categorical_accuracy'])
 plt.plot(history.history['val_categorical_accuracy'])
 plt.title('model accuracy')
@@ -512,7 +512,7 @@ plt.savefig('testAcc4.png')
 # In[32]:
 
 
-plt.figure(1)
+plt.figure(8)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('model loss')
@@ -548,7 +548,7 @@ history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, valida
 # In[35]:
 
 
-plt.figure(1)
+plt.figure(9)
 plt.plot(history.history['categorical_accuracy'])
 plt.plot(history.history['val_categorical_accuracy'])
 plt.title('model accuracy')
@@ -561,7 +561,7 @@ plt.savefig('testAcc5.png')
 # In[36]:
 
 
-plt.figure(1)
+plt.figure(10)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('model loss')
@@ -597,7 +597,7 @@ history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, valida
 # In[39]:
 
 
-plt.figure(1)
+plt.figure(11)
 plt.plot(history.history['categorical_accuracy'])
 plt.plot(history.history['val_categorical_accuracy'])
 plt.title('model accuracy')
@@ -610,7 +610,7 @@ plt.savefig('testAcc6.png')
 # In[40]:
 
 
-plt.figure(1)
+plt.figure(12)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('model loss')
@@ -646,7 +646,7 @@ history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, valida
 # In[43]:
 
 
-plt.figure(1)
+plt.figure(13)
 plt.plot(history.history['categorical_accuracy'])
 plt.plot(history.history['val_categorical_accuracy'])
 plt.title('model accuracy')
@@ -659,7 +659,7 @@ plt.savefig('testAcc7.png')
 # In[44]:
 
 
-plt.figure(1)
+plt.figure(14)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('model loss')
@@ -697,7 +697,7 @@ history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, valida
 # In[47]:
 
 
-plt.figure(1)
+plt.figure(15)
 plt.plot(history.history['categorical_accuracy'])
 plt.plot(history.history['val_categorical_accuracy'])
 plt.title('model accuracy')
@@ -710,7 +710,7 @@ plt.savefig('testAcc8.png')
 # In[48]:
 
 
-plt.figure(1)
+plt.figure(16)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('model loss')
@@ -746,7 +746,7 @@ history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, valida
 # In[51]:
 
 
-plt.figure(1)
+plt.figure(17)
 plt.plot(history.history['categorical_accuracy'])
 plt.plot(history.history['val_categorical_accuracy'])
 plt.title('model accuracy')
@@ -759,7 +759,7 @@ plt.savefig('testAcc9.png')
 # In[52]:
 
 
-plt.figure(1)
+plt.figure(18)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('model loss')

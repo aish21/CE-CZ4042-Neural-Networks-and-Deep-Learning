@@ -2,9 +2,7 @@
 
 import pandas as pd
 
-text_emotion_recognition = pd.read_csv("/content/sample_data/text_emotion_recognition.csv")
-
-text_emotion_recognition.head()
+text_emotion_recognition = pd.read_csv("data/Original Data/text_emotion_recognition.csv")
 
 def dropColumns(df, columns_to_drop): #This function is utilized to drop the specified columns in the columns_to_drop list and returns the dataframe
   for column in columns_to_drop:
@@ -36,5 +34,5 @@ text_emotion_recognition
 sentiment_categories = list(text_emotion_recognition['tweettype'].unique())
 sentiment_categories
 
-text_emotion_recognition.to_csv('text_emotion_recognition_updated.csv')
+text_emotion_recognition.to_csv('data/Original Data/text_emotion_recognition_updated.csv')
 
