@@ -26,7 +26,7 @@ from tensorflow.keras.optimizers import Adam
 from keras.constraints import maxnorm
 
 #Reading in the dataset
-tweetData = pd.read_csv('data\Feature-Engineered.csv', index_col=False)
+tweetData = pd.read_csv('../data/Feature-Engineered.csv', index_col=False)
 
 # Added in to avoid formatting error
 labels = np.array(tweetData['tweettype'])
@@ -136,7 +136,7 @@ plt.legend(['train', 'test'], loc='best')
 plt.savefig('LSTM-Bidirectional-Final-Loss.png')
 
 """Model trial after clubbing output labels"""
-tweetData = pd.read_csv('data\Postprocessed-Feature-Engineered.csv', index_col=False)
+tweetData = pd.read_csv('../data/Postprocessed-Feature-Engineered.csv', index_col=False)
 
 #New labels
 labels = np.array(tweetData['tweettype'])

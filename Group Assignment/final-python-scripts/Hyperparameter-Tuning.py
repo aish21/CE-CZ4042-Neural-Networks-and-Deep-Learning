@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 '''
 This file is used for Hyperparameter Tuning of parameters used in the construction of the LSTM architecture.
 The parameters - 
@@ -35,21 +29,15 @@ import tensorflow as tf
 from tensorflow import keras
 import numpy as np
 from nltk.tokenize import word_tokenize
+nltk.download('punkt')
 from keras.wrappers.scikit_learn import KerasClassifier
 from sklearn.model_selection import GridSearchCV
 from keras.constraints import maxnorm
 from tensorflow.keras.optimizers import Adam 
 from matplotlib import pyplot as plt
 
-
-# In[2]:
-
-
-tweetData = pd.read_csv('data/Feature-Engineered.csv', index_col=False)
-
-
-# In[4]:
-
+#Read dataset
+tweetData = pd.read_csv('../data/Feature-Engineered.csv', index_col=False)
 
 # Added in to avoid formatting error
 labels = np.array(tweetData['tweettype'])
@@ -118,11 +106,7 @@ X = pad_sequences(X)
 
 X_train, X_test, Y_train, Y_test = train_test_split(X, labels, test_size=0.3, random_state=42)
 
-
-# ### Number of Epochs + Batch Size
-
-# In[5]:
-
+#Number of Epochs + Batch Size
 
 def build_lstm():
     keras.backend.clear_session()
@@ -135,10 +119,6 @@ def build_lstm():
     model_dropout.add(Dense(9, activation='softmax'))
     model_dropout.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['categorical_accuracy'])
     return model_dropout
-
-
-# In[6]:
-
 
 # Create model
 model = KerasClassifier(build_fn=build_lstm, verbose=0)
@@ -158,11 +138,7 @@ params = grid_result.cv_results_['params']
 for mean, stdev, param in zip(means, stds, params):
     print("%f (%f) with: %r" % (mean, stdev, param))
 
-
-# ### Optimization Algorithm
-
-# In[ ]:
-
+# Optimization Algorithm
 
 def build_lstm_optimizer():
     keras.backend.clear_session()
@@ -175,10 +151,6 @@ def build_lstm_optimizer():
     model_dropout.add(Dense(9, activation='softmax'))
     model_dropout.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['categorical_accuracy'])
     return model_dropout
-
-
-# In[ ]:
-
 
 # Create model
 model=KerasClassifier(build_fn=build_lstm_optimizer, epochs=50, batch_size=512, verbose=-1)
@@ -197,11 +169,7 @@ params = grid_result.cv_results_['params']
 for mean, stdev, param in zip(means, stds, params):
     print("%f (%f) with: %r" % (mean, stdev, param))
 
-
-# ### Learning Rate
-
-# In[13]:
-
+# Learning Rate
 
 def build_lstm_learning_rate():
     keras.backend.clear_session()
@@ -215,10 +183,6 @@ def build_lstm_learning_rate():
     optimizer = Adam(lr = learn_rate)
     model_dropout.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['categorical_accuracy'])
     return model_dropout
-
-
-# In[14]:
-
 
 # Create model
 model=KerasClassifier(build_fn=build_lstm_learning_rate, epochs=50, batch_size=512, verbose=-1)
@@ -237,11 +201,7 @@ params = grid_result.cv_results_['params']
 for mean, stdev, param in zip(means, stds, params):
     print("%f (%f) with: %r" % (mean, stdev, param))
 
-
-# ### Network Weight Initialization
-
-# In[ ]:
-
+# Network Weight Initialization
 
 def build_lstm_weight():
     keras.backend.clear_session()
@@ -255,10 +215,6 @@ def build_lstm_weight():
     optimizer = Adam(lr = 0.001)
     model_dropout.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['categorical_accuracy'])
     return model_dropout
-
-
-# In[ ]:
-
 
 # Create model
 model=KerasClassifier(build_fn=build_lstm_weight, epochs=50, batch_size=512, verbose=-1)
@@ -277,11 +233,7 @@ params = grid_result.cv_results_['params']
 for mean, stdev, param in zip(means, stds, params):
     print("%f (%f) with: %r" % (mean, stdev, param))
 
-
-# ### Dropout Regularization
-
-# In[ ]:
-
+# Dropout Regularization
 
 def build_lstm_dropout(dropout_rate=0.0, weight_constraint=0):
     embed_dim = 8
@@ -296,10 +248,6 @@ def build_lstm_dropout(dropout_rate=0.0, weight_constraint=0):
     optimizer = Adam(lr=0.001)
     model_dropout.compile(loss='categorical_crossentropy', optimizer=optimizer, metrics=['categorical_accuracy'])
     return model_dropout
-
-
-# In[ ]:
-
 
 # Create model
 model=KerasClassifier(build_fn=build_lstm_dropout, epochs=50, batch_size=512, verbose=-1)
@@ -319,11 +267,7 @@ params = grid_result.cv_results_['params']
 for mean, stdev, param in zip(means, stds, params):
     print("%f (%f) with: %r" % (mean, stdev, param))
 
-
-# ### Trial and Error of remaining parameters based on Accuracy + Loss Plots
-
-# In[17]:
-
+# Trial and Error of remaining parameters based on Accuracy + Loss Plots
 
 embed_dim = 64
 keras.backend.clear_session()
@@ -337,16 +281,8 @@ model_dropout.add(Dense(9, activation='softmax'))
 
 model_dropout.summary()
 
-
-# In[18]:
-
-
 model_dropout.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['categorical_accuracy'])
 history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, validation_data=(X_test, Y_test))
-
-
-# In[19]:
-
 
 # plotting the accuracies for the training epochs
 plt.figure(1)
@@ -358,10 +294,6 @@ plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
 plt.savefig('testAcc1.png')
 
-
-# In[20]:
-
-
 # plotting the losses for the training epochs
 plt.figure(2)
 plt.plot(history.history['loss'])
@@ -371,10 +303,6 @@ plt.ylabel('cross-entropy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
 plt.savefig('testloss1.png')
-
-
-# In[21]:
-
 
 embed_dim = 64
 keras.backend.clear_session()
@@ -388,16 +316,8 @@ model_dropout.add(Dense(9, activation='softmax'))
 
 model_dropout.summary()
 
-
-# In[22]:
-
-
 model_dropout.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['categorical_accuracy'])
 history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, validation_data=(X_test, Y_test))
-
-
-# In[23]:
-
 
 # plotting the accuracies for the training epochs
 plt.figure(3)
@@ -409,10 +329,6 @@ plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
 plt.savefig('testAcc2.png')
 
-
-# In[24]:
-
-
 # plotting the losses for the training epochs
 plt.figure(4)
 plt.plot(history.history['loss'])
@@ -422,10 +338,6 @@ plt.ylabel('cross-entropy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
 plt.savefig('testloss2.png')
-
-
-# In[25]:
-
 
 embed_dim = 64
 keras.backend.clear_session()
@@ -439,16 +351,8 @@ model_dropout.add(Dense(9, activation='softmax'))
 
 model_dropout.summary()
 
-
-# In[26]:
-
-
 model_dropout.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['categorical_accuracy'])
 history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, validation_data=(X_test, Y_test))
-
-
-# In[27]:
-
 
 plt.figure(5)
 plt.plot(history.history['categorical_accuracy'])
@@ -459,10 +363,6 @@ plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
 plt.savefig('testAcc3.png')
 
-
-# In[28]:
-
-
 plt.figure(6)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
@@ -471,10 +371,6 @@ plt.ylabel('cross-entropy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
 plt.savefig('testloss3.png')
-
-
-# In[29]:
-
 
 embed_dim = 128
 keras.backend.clear_session()
@@ -488,16 +384,8 @@ model_dropout.add(Dense(9, activation='softmax'))
 
 model_dropout.summary()
 
-
-# In[30]:
-
-
 model_dropout.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['categorical_accuracy'])
 history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, validation_data=(X_test, Y_test))
-
-
-# In[31]:
-
 
 plt.figure(7)
 plt.plot(history.history['categorical_accuracy'])
@@ -508,10 +396,6 @@ plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
 plt.savefig('testAcc4.png')
 
-
-# In[32]:
-
-
 plt.figure(8)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
@@ -520,10 +404,6 @@ plt.ylabel('cross-entropy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
 plt.savefig('testloss4.png')
-
-
-# In[33]:
-
 
 embed_dim = 32
 keras.backend.clear_session()
@@ -537,16 +417,8 @@ model_dropout.add(Dense(9, activation='softmax'))
 
 model_dropout.summary()
 
-
-# In[34]:
-
-
 model_dropout.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['categorical_accuracy'])
 history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, validation_data=(X_test, Y_test))
-
-
-# In[35]:
-
 
 plt.figure(9)
 plt.plot(history.history['categorical_accuracy'])
@@ -557,10 +429,6 @@ plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
 plt.savefig('testAcc5.png')
 
-
-# In[36]:
-
-
 plt.figure(10)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
@@ -569,10 +437,6 @@ plt.ylabel('cross-entropy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
 plt.savefig('testloss5.png')
-
-
-# In[37]:
-
 
 embed_dim = 16
 keras.backend.clear_session()
@@ -586,16 +450,8 @@ model_dropout.add(Dense(9, activation='softmax'))
 
 model_dropout.summary()
 
-
-# In[38]:
-
-
 model_dropout.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['categorical_accuracy'])
 history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, validation_data=(X_test, Y_test))
-
-
-# In[39]:
-
 
 plt.figure(11)
 plt.plot(history.history['categorical_accuracy'])
@@ -606,10 +462,6 @@ plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
 plt.savefig('testAcc6.png')
 
-
-# In[40]:
-
-
 plt.figure(12)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
@@ -618,10 +470,6 @@ plt.ylabel('cross-entropy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
 plt.savefig('testloss6.png')
-
-
-# In[41]:
-
 
 embed_dim = 8
 keras.backend.clear_session()
@@ -635,16 +483,8 @@ model_dropout.add(Dense(9, activation='softmax'))
 
 model_dropout.summary()
 
-
-# In[42]:
-
-
 model_dropout.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['categorical_accuracy'])
 history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, validation_data=(X_test, Y_test))
-
-
-# In[43]:
-
 
 plt.figure(13)
 plt.plot(history.history['categorical_accuracy'])
@@ -655,10 +495,6 @@ plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
 plt.savefig('testAcc7.png')
 
-
-# In[44]:
-
-
 plt.figure(14)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
@@ -667,10 +503,6 @@ plt.ylabel('cross-entropy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
 plt.savefig('testloss7.png')
-
-
-# In[45]:
-
 
 embed_dim = 8
 keras.backend.clear_session()
@@ -686,16 +518,8 @@ model_dropout.add(Dense(9, activation='softmax'))
 
 model_dropout.summary()
 
-
-# In[46]:
-
-
 model_dropout.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['categorical_accuracy'])
 history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, validation_data=(X_test, Y_test))
-
-
-# In[47]:
-
 
 plt.figure(15)
 plt.plot(history.history['categorical_accuracy'])
@@ -706,10 +530,6 @@ plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
 plt.savefig('testAcc8.png')
 
-
-# In[48]:
-
-
 plt.figure(16)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
@@ -718,10 +538,6 @@ plt.ylabel('cross-entropy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
 plt.savefig('testloss8.png')
-
-
-# In[49]:
-
 
 embed_dim = 8
 keras.backend.clear_session()
@@ -735,16 +551,8 @@ model_dropout.add(Dense(9, activation='softmax'))
 
 model_dropout.summary()
 
-
-# In[50]:
-
-
 model_dropout.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['categorical_accuracy'])
 history = model_dropout.fit(X_train, Y_train, epochs = 20, batch_size=64, validation_data=(X_test, Y_test))
-
-
-# In[51]:
-
 
 plt.figure(17)
 plt.plot(history.history['categorical_accuracy'])
@@ -755,10 +563,6 @@ plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
 plt.savefig('testAcc9.png')
 
-
-# In[52]:
-
-
 plt.figure(18)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
@@ -767,4 +571,3 @@ plt.ylabel('cross-entropy')
 plt.xlabel('epoch')
 plt.legend(['train', 'test'], loc='best')
 plt.savefig('testloss9.png')
-

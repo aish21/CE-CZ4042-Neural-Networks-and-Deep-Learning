@@ -26,7 +26,7 @@ from keras import backend as K
 from keras.layers import Layer
 
 #Reading the feature engineered dataset
-tweetData = pd.read_csv('data/Feature-Engineered.csv', index_col=False)
+tweetData = pd.read_csv('../data/Feature-Engineered.csv', index_col=False)
 tweetData
 
 # Added in to avoid formatting error
